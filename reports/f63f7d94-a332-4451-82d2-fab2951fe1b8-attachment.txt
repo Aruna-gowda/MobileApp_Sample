@@ -1,0 +1,4 @@
+check whether device is locked or not : False
+Current Package ai.edify.rome.stg
+Current Activity ai.edify.rome.MainActivity
+Current context NATIVE_APP

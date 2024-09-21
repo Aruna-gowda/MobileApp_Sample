@@ -21,7 +21,7 @@ class LoginPage(BasePage):
     def Login(self):
         Email = ReadConfigurations.read_configuration("basic info", "Email")
         Password = ReadConfigurations.read_configuration("basic info", "Password")
-        self.Click("Button_Security_XPATH", Login.Button_Security_XPATH)
+        # self.Click("Button_Security_XPATH", Login.Button_Security_XPATH)
         # self.Type(Email, "Input_Email_XPATH", Login.Input_Email_XPATH)
         # self.Type(Password, "Input_Password_XPATH",Login.Input_Password_XPATH)
         # self.Click("Button_Login_XPATH", Login.Button_Login_XPATH)

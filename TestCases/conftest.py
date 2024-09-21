@@ -31,9 +31,9 @@ def setup_and_teardown(request):
         options = AppiumOptions()
         options.load_capabilities({
             "platformName": "Android",
-            "appium:deviceName": "cafb68e90405",
+            "appium:deviceName": "emulator-5554",
             "appium:automationName": "UiAutomator2",
-            "appium:platformVersion": "10",
+            "appium:platformVersion": "14",
             "appium:app": "C:/Users/Aruna Aruna/Downloads/app.apk",
             "appium:appPackage": "ai.edify.rome.stg",
             "appium:appActivity": "ai.edify.rome.MainActivity",

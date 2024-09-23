@@ -1,0 +1,89 @@
+name: Mobile Automation Testing on macOS
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  run-tests:
+    runs-on: macos-latest
+
+    env:
+      ADB_INSTALL_TIMEOUT: 20  # Time in minutes to wait for the emulator to start
+      DEVICE: "Pixel_3a_API_30"  # Emulator device name
+      API_LEVEL: 30  # Android API level
+      TARGET: "google_apis"  # Target (e.g., google_apis, google_apis_playstore)
+      EMULATOR_NAME: "Android_Emulator"
+      TEST_APK_PATH: "./Apps/apks/app.apk"  # Path to your APK file
+
+    steps:
+    # Step 1: Checkout the code from the repository
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Step 2: Set up Python environment
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v3
+      with:
+        python-version: 3.9
+
+    # Step 3: Install Java JDK (required by Android SDK)
+    - name: Install Java JDK
+      run: |
+        brew install --cask temurin # Temurin is an OpenJDK distribution
+        java -version  # Verify Java installation
+
+    # Step 4: Install Node.js (required for Appium)
+    - name: Install Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'  # Use a stable Node.js version
+
+    # Step 5: Install Appium (Global Installation)
+    - name: Install Appium
+      run: npm install -g appium
+
+    # Step 6: Install Android SDK, set up environment variables
+    - name: Install Android SDK
+      run: |
+        brew install --cask android-sdk
+        echo "export ANDROID_SDK_ROOT=/usr/local/share/android-sdk" >> $HOME/.bash_profile
+        echo "export PATH=$ANDROID_SDK_ROOT/platform-tools:$PATH" >> $HOME/.bash_profile
+        source $HOME/.bash_profile
+
+    # Step 7: Install Android emulator, system image, and start emulator
+    - name: Install Android Emulator and System Image
+      run: |
+        yes | sdkmanager --install "system-images;android-${{ env.API_LEVEL }};${{ env.TARGET }};x86_64"
+        yes | sdkmanager --licenses
+        sdkmanager "platform-tools" "emulator" "platforms;android-${{ env.API_LEVEL }}"
+        avdmanager create avd -n ${{ env.EMULATOR_NAME }} -k "system-images;android-${{ env.API_LEVEL }};${{ env.TARGET }};x86_64" --device ${{ env.DEVICE }}
+
+    # Step 8: Start the Android emulator
+    - name: Start Android Emulator
+      run: |
+        nohup emulator -avd ${{ env.EMULATOR_NAME }} -no-audio -no-window -gpu swiftshader_indirect &
+
+    # Step 9: Wait for emulator to be ready
+    - name: Wait for Emulator to Start
+      run: |
+        adb wait-for-device
+        adb shell input keyevent 82 # Unlock screen
+
+    # Step 10: Install the APK on the emulator
+    - name: Install APK on Emulator
+      run: adb install ${{ env.TEST_APK_PATH }}
+
+    # Step 11: Start Appium server and run tests
+    - name: Start Appium Server and Run Tests
+      run: |
+        appium &  # Start Appium server in the background
+        pytest pytest --alluredir="./reports"  # Run your Appium Python tests
+
+    # Step 12: Upload test results (optional)
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results
+        path: reports/

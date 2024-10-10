@@ -28,11 +28,19 @@ jobs:
       with:
         python-version: 3.9
 
-    # Step 3: Install Temurin JDK 8 (current version available via Homebrew)
-    - name: Install JDK 8
+    # Step 3: Install Temurin JDK 11+ (OpenJDK 11)
+    - name: Install JDK 11
       run: |
-        brew install --cask temurin  # Use latest Temurin JDK (Supports JDK 8+)
+        brew install --cask temurin  # Use latest Temurin JDK (JDK 11+)
         java -version  # Verify Java installation
+    
+    # Install JAXB (Java XML Binding API)
+    - name: Install JAXB for JDK 11+
+      run: |
+        curl -L -o jaxb-api.zip https://repo1.maven.org/maven2/com/sun/xml/bind/jaxb-ri/2.3.3/jaxb-ri-2.3.3.zip
+        unzip jaxb-api.zip
+        export CLASSPATH=$CLASSPATH:$(pwd)/jaxb-ri-2.3.3/lib/jaxb-api.jar:$(pwd)/jaxb-ri-2.3.3/lib/jaxb-impl.jar:$(pwd)/jaxb-ri-2.3.3/lib/jaxb-core.jar
+
     
     # Step 4: Install Node.js (required for Appium)
     - name: Install Node.js

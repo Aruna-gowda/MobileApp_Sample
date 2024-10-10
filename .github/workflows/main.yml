@@ -29,11 +29,10 @@ jobs:
       with:
         python-version: 3.9
 
-    # Step 3: Install Temurin JDK 11+ (OpenJDK 11)
+    # Step 3: Install JDK 11+ (OpenJDK 11)
     - name: Install JDK 11
       run: |
-        brew install --cask temurin  # Use latest Temurin JDK (JDK 11+)
-        java -version  # Verify Java installation
+        brew install --cask temurin  # Install the latest JDK
         echo "export JAVA_HOME=$(/usr/libexec/java_home -v 11)" >> $HOME/.bash_profile
         source $HOME/.bash_profile
 
@@ -58,16 +57,16 @@ jobs:
         echo "export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH" >> $HOME/.bash_profile
         source $HOME/.bash_profile
 
-    # Debug Step: List Installed SDK Packages
-    - name: List Installed SDK Packages
+    # Debug Step: Verify SDK Tools Installation
+    - name: Verify SDK Tools Installation
       run: |
-        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --list
+        ls -la $ANDROID_SDK_ROOT/cmdline-tools/latest/bin
 
     # Step 7: Install SDK components
     - name: Install Android Emulator and System Image
       run: |
-        yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --install "platform-tools" "emulator" "system-images;android-${{ env.API_LEVEL }};${{ env.TARGET }};x86_64"
-        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager create avd -n ${{ env.EMULATOR_NAME }} -k "system-images;android-${{ env.API_LEVEL }};${{ env.TARGET }};x86_64" --device ${{ env.DEVICE }}
+        yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --install "platform-tools" "emulator" "system-images;android-${{ env.API_LEVEL }};${{ env.TARGET }};x86_64" || { echo "SDK installation failed"; exit 1; }
+        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager create avd -n ${{ env.EMULATOR_NAME }} -k "system-images;android-${{ env.API_LEVEL }};${{ env.TARGET }};x86_64" --device ${{ env.DEVICE }} || { echo "AVD creation failed"; exit 1; }
 
     # Step 8: Start the Android emulator
     - name: Start Android Emulator

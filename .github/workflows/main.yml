@@ -28,11 +28,10 @@ jobs:
       with:
         python-version: 3.9
 
-    # Step 3: Install OpenJDK 8 (Alternative for temurin8)
-    - name: Install OpenJDK 8
+    # Step 3: Install Temurin JDK 8 (current version available via Homebrew)
+    - name: Install JDK 8
       run: |
-        brew tap homebrew/cask-versions
-        brew install --cask adoptopenjdk8  # Use AdoptOpenJDK 8
+        brew install --cask temurin  # Use latest Temurin JDK (Supports JDK 8+)
         java -version  # Verify Java installation
     
     # Step 4: Install Node.js (required for Appium)

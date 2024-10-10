@@ -16,6 +16,7 @@ jobs:
       TARGET: "google_apis"  # Target (e.g., google_apis, google_apis_playstore)
       EMULATOR_NAME: "Android_Emulator"
       TEST_APK_PATH: "./Apps/apks/app.apk"  # Path to your APK file
+      ANDROID_SDK_ROOT: $HOME/Library/Android/sdk  # Path to Android SDK
 
     steps:
     # Step 1: Checkout the code from the repository
@@ -41,7 +42,6 @@ jobs:
         unzip jaxb-api.zip
         export CLASSPATH=$CLASSPATH:$(pwd)/jaxb-ri-2.3.3/lib/jaxb-api.jar:$(pwd)/jaxb-ri-2.3.3/lib/jaxb-impl.jar:$(pwd)/jaxb-ri-2.3.3/lib/jaxb-core.jar
 
-    
     # Step 4: Install Node.js (required for Appium)
     - name: Install Node.js
       uses: actions/setup-node@v3
@@ -52,27 +52,27 @@ jobs:
     - name: Install Appium
       run: npm install -g appium
 
-    # Step 6: Install Android SDK, set up environment variables
-    - name: Install Android SDK
+    # Step 6: Install Android SDK cmdline-tools
+    - name: Install Android SDK cmdline-tools
       run: |
-        brew install --cask android-sdk
-        echo "export ANDROID_SDK_ROOT=/usr/local/share/android-sdk" >> $HOME/.bash_profile
-        echo "export PATH=$ANDROID_SDK_ROOT/platform-tools:$PATH" >> $HOME/.bash_profile
-        source $HOME/.bash_profile
+        mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
+        curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-mac-8512546_latest.zip
+        unzip sdk-tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools
+        mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
+        yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
 
     # Step 7: Install Android emulator, system image, and start emulator
     - name: Install Android Emulator and System Image
       run: |
-        yes | sdkmanager --install "system-images;android-${{ env.API_LEVEL }};${{ env.TARGET }};x86_64"
-        yes | sdkmanager --licenses
-        sdkmanager "platform-tools" "emulator" "platforms;android-${{ env.API_LEVEL }}"
-        avdmanager create avd -n ${{ env.EMULATOR_NAME }} -k "system-images;android-${{ env.API_LEVEL }};${{ env.TARGET }};x86_64" --device ${{ env.DEVICE }}
+        yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --install "system-images;android-${{ env.API_LEVEL }};${{ env.TARGET }};x86_64"
+        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "platform-tools" "emulator" "platforms;android-${{ env.API_LEVEL }}"
+        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager create avd -n ${{ env.EMULATOR_NAME }} -k "system-images;android-${{ env.API_LEVEL }};${{ env.TARGET }};x86_64" --device ${{ env.DEVICE }}
     
     # Step 8: Start the Android emulator
     - name: Start Android Emulator
       run: |
         nohup emulator -avd ${{ env.EMULATOR_NAME }} -no-audio -no-window -gpu swiftshader_indirect &
-    
+
     # Step 9: Wait for emulator to be ready
     - name: Wait for Emulator to Start
       run: |

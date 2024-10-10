@@ -32,7 +32,7 @@ jobs:
     # Step 3: Install JDK 11+ (OpenJDK 11)
     - name: Install JDK 11
       run: |
-        brew install --cask temurin  # Install the latest JDK
+        brew install --cask temurin
         echo "export JAVA_HOME=$(/usr/libexec/java_home -v 11)" >> $HOME/.bash_profile
         source $HOME/.bash_profile
 
@@ -50,18 +50,17 @@ jobs:
     - name: Install Android SDK cmdline-tools
       run: |
         mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
-        curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-mac-8512546_latest.zip
+        curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-mac-6858069_latest.zip
         unzip sdk-tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools
         mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
         rm sdk-tools.zip
         echo "export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH" >> $HOME/.bash_profile
         source $HOME/.bash_profile
 
-    # Step 7: Verify SDK Tools Installation
-    - name: Verify SDK Tools Installation
+    # Step 7: List Installed SDK packages (for debugging)
+    - name: List Installed SDK packages
       run: |
-        ls -la $ANDROID_SDK_ROOT/cmdline-tools/latest/bin
-        java -version  # Verify Java installation
+        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --list
 
     # Step 8: Install SDK components
     - name: Install Android Emulator and System Image

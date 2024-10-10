@@ -34,7 +34,9 @@ jobs:
       run: |
         brew install --cask temurin  # Use latest Temurin JDK (JDK 11+)
         java -version  # Verify Java installation
-    
+        echo "export JAVA_HOME=$(/usr/libexec/java_home -v 11)" >> $HOME/.bash_profile
+        source $HOME/.bash_profile
+
     # Step 4: Install Node.js (required for Appium)
     - name: Install Node.js
       uses: actions/setup-node@v3
@@ -55,7 +57,11 @@ jobs:
         rm sdk-tools.zip
         echo "export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH" >> $HOME/.bash_profile
         source $HOME/.bash_profile
-        yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
+
+    # Debug Step: List Installed SDK Packages
+    - name: List Installed SDK Packages
+      run: |
+        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --list
 
     # Step 7: Install SDK components
     - name: Install Android Emulator and System Image

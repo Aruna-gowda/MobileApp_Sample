@@ -28,12 +28,12 @@ jobs:
       with:
         python-version: 3.9
 
-    # Step 3: Install Java JDK (required by Android SDK)
-    - name: Install Java JDK
+    # Step 3: Install Java JDK 8 (To fix JAXB issues)
+    - name: Install Java JDK 8
       run: |
-        brew install --cask temurin # Temurin is an OpenJDK distribution
+        brew install --cask temurin8 # Install JDK 8
         java -version  # Verify Java installation
-
+    
     # Step 4: Install Node.js (required for Appium)
     - name: Install Node.js
       uses: actions/setup-node@v3
@@ -59,12 +59,12 @@ jobs:
         yes | sdkmanager --licenses
         sdkmanager "platform-tools" "emulator" "platforms;android-${{ env.API_LEVEL }}"
         avdmanager create avd -n ${{ env.EMULATOR_NAME }} -k "system-images;android-${{ env.API_LEVEL }};${{ env.TARGET }};x86_64" --device ${{ env.DEVICE }}
-
+    
     # Step 8: Start the Android emulator
     - name: Start Android Emulator
       run: |
         nohup emulator -avd ${{ env.EMULATOR_NAME }} -no-audio -no-window -gpu swiftshader_indirect &
-
+    
     # Step 9: Wait for emulator to be ready
     - name: Wait for Emulator to Start
       run: |

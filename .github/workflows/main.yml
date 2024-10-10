@@ -28,10 +28,11 @@ jobs:
       with:
         python-version: 3.9
 
-    # Step 3: Install Java JDK 8 (To fix JAXB issues)
-    - name: Install Java JDK 8
+    # Step 3: Install OpenJDK 8 (Alternative for temurin8)
+    - name: Install OpenJDK 8
       run: |
-        brew install --cask temurin8 # Install JDK 8
+        brew tap homebrew/cask-versions
+        brew install --cask adoptopenjdk8  # Use AdoptOpenJDK 8
         java -version  # Verify Java installation
     
     # Step 4: Install Node.js (required for Appium)

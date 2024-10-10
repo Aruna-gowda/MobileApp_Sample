@@ -1,4 +1,4 @@
-name: Mobile Automation Testing on macOS
+name: Example Artifact Workflow
 
 on:
   push:
@@ -6,92 +6,47 @@ on:
       - master
 
 jobs:
-  run-tests:
-    runs-on: macos-latest
-
-    env:
-      ADB_INSTALL_TIMEOUT: 20  # Time in minutes to wait for the emulator to start
-      DEVICE: "Pixel_3a_API_30"  # Emulator device name
-      API_LEVEL: 30  # Android API level
-      TARGET: "google_apis"  # Target (e.g., google_apis, google_apis_playstore)
-      EMULATOR_NAME: "Android_Emulator"
-      TEST_APK_PATH: "./Apps/apks/app.apk"  # Path to your APK file
-      ANDROID_SDK_ROOT: $HOME/Library/Android/sdk  # Path to Android SDK
+  build:
+    runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Checkout the code from the repository
-    - name: Checkout code
-      uses: actions/checkout@v3
+      # Step 1: Check out the code from the repository
+      - name: Check out code
+        uses: actions/checkout@v2
 
-    # Step 2: Set up Python environment
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v3
-      with:
-        python-version: 3.9
+      # Step 2: Create a sample file to upload
+      - name: Create sample file
+        run: |
+          echo "This is a sample file." > sample.txt
+          echo "Sample file created."
 
-    # Step 3: Install JDK 11+ (OpenJDK 11)
-    - name: Install JDK 11
-      run: |
-        brew install --cask temurin
-        echo "export JAVA_HOME=$(/usr/libexec/java_home -v 11)" >> $HOME/.bash_profile
-        source $HOME/.bash_profile
+      # Step 3: Upload the sample file as an artifact
+      - name: Upload sample artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: sample-file
+          path: sample.txt  # This uploads sample.txt as an artifact
 
-    # Step 4: Install Node.js (required for Appium)
-    - name: Install Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '16'  # Use a stable Node.js version
+  download:
+    runs-on: ubuntu-latest
+    needs: build  # This job depends on the 'build' job
 
-    # Step 5: Install Appium (Global Installation)
-    - name: Install Appium
-      run: npm install -g appium
+    steps:
+      # Step 4: Check out the code from the repository
+      - name: Check out code
+        uses: actions/checkout@v2
 
-    # Step 6: Download and Setup Android SDK cmdline-tools
-    - name: Install Android SDK cmdline-tools
-      run: |
-        mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
-        curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-mac-6858069_latest.zip
-        unzip sdk-tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools
-        mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
-        rm sdk-tools.zip
-        echo "export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH" >> $HOME/.bash_profile
-        source $HOME/.bash_profile
+      # Step 5: Download the uploaded artifact
+      - name: Download Sample Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: sample-file
+          path: ${{ github.workspace }}  # Download to the workspace
 
-    # Step 7: List Installed SDK packages (for debugging)
-    - name: List Installed SDK packages
-      run: |
-        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --list
+      # Step 6: List the files in the workspace
+      - name: List downloaded files
+        run: ls -al ${{ github.workspace }}  # List all files, including downloaded artifacts
 
-    # Step 8: Install SDK components
-    - name: Install Android Emulator and System Image
-      run: |
-        yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --install "platform-tools" "emulator" "system-images;android-${{ env.API_LEVEL }};${{ env.TARGET }};x86_64" || { echo "SDK installation failed"; exit 1; }
-        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager create avd -n ${{ env.EMULATOR_NAME }} -k "system-images;android-${{ env.API_LEVEL }};${{ env.TARGET }};x86_64" --device ${{ env.DEVICE }} || { echo "AVD creation failed"; exit 1; }
-
-    # Step 9: Start the Android emulator
-    - name: Start Android Emulator
-      run: |
-        nohup emulator -avd ${{ env.EMULATOR_NAME }} -no-audio -no-window -gpu swiftshader_indirect &
-
-    # Step 10: Wait for emulator to be ready
-    - name: Wait for Emulator to Start
-      run: |
-        adb wait-for-device
-        adb shell input keyevent 82 # Unlock screen
-
-    # Step 11: Install the APK on the emulator
-    - name: Install APK on Emulator
-      run: adb install ${{ env.TEST_APK_PATH }}
-
-    # Step 12: Start Appium server and run tests
-    - name: Start Appium Server and Run Tests
-      run: |
-        appium &  # Start Appium server in the background
-        pytest pytest --alluredir="./reports"  # Run your Appium Python tests
-
-    # Step 13: Upload test results (optional)
-    - name: Upload test results
-      uses: actions/upload-artifact@v3
-      with:
-        name: test-results
-        path: reports/
+      # Step 7: Display the contents of the downloaded file
+      - name: Display contents of the sample file
+        run: cat ${{ github.workspace }}/sample.txt  # Display the contents of sample.txt

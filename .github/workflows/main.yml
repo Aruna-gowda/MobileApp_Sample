@@ -56,7 +56,7 @@ jobs:
         source $HOME/.bash_profile
         yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
 
-    # Step 7: Install Android Emulator and System Image
+    # Step 7: Reinstall the SDK components with the correct path
     - name: Install Android Emulator and System Image
       run: |
         yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --install "system-images;android-${{ env.API_LEVEL }};${{ env.TARGET }};x86_64"

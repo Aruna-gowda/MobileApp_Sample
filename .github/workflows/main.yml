@@ -52,15 +52,15 @@ jobs:
         curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-mac-8512546_latest.zip
         unzip sdk-tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools
         mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
+        rm sdk-tools.zip
         echo "export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH" >> $HOME/.bash_profile
         source $HOME/.bash_profile
         yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
 
-    # Step 7: Reinstall the SDK components with the correct path
+    # Step 7: Install SDK components
     - name: Install Android Emulator and System Image
       run: |
-        yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --install "system-images;android-${{ env.API_LEVEL }};${{ env.TARGET }};x86_64"
-        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "platform-tools" "emulator" "platforms;android-${{ env.API_LEVEL }}"
+        yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --install "platform-tools" "emulator" "system-images;android-${{ env.API_LEVEL }};${{ env.TARGET }};x86_64"
         $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager create avd -n ${{ env.EMULATOR_NAME }} -k "system-images;android-${{ env.API_LEVEL }};${{ env.TARGET }};x86_64" --device ${{ env.DEVICE }}
 
     # Step 8: Start the Android emulator

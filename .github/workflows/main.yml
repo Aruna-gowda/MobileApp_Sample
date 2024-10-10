@@ -57,39 +57,40 @@ jobs:
         echo "export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH" >> $HOME/.bash_profile
         source $HOME/.bash_profile
 
-    # Debug Step: Verify SDK Tools Installation
+    # Step 7: Verify SDK Tools Installation
     - name: Verify SDK Tools Installation
       run: |
         ls -la $ANDROID_SDK_ROOT/cmdline-tools/latest/bin
+        java -version  # Verify Java installation
 
-    # Step 7: Install SDK components
+    # Step 8: Install SDK components
     - name: Install Android Emulator and System Image
       run: |
         yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --install "platform-tools" "emulator" "system-images;android-${{ env.API_LEVEL }};${{ env.TARGET }};x86_64" || { echo "SDK installation failed"; exit 1; }
         $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager create avd -n ${{ env.EMULATOR_NAME }} -k "system-images;android-${{ env.API_LEVEL }};${{ env.TARGET }};x86_64" --device ${{ env.DEVICE }} || { echo "AVD creation failed"; exit 1; }
 
-    # Step 8: Start the Android emulator
+    # Step 9: Start the Android emulator
     - name: Start Android Emulator
       run: |
         nohup emulator -avd ${{ env.EMULATOR_NAME }} -no-audio -no-window -gpu swiftshader_indirect &
 
-    # Step 9: Wait for emulator to be ready
+    # Step 10: Wait for emulator to be ready
     - name: Wait for Emulator to Start
       run: |
         adb wait-for-device
         adb shell input keyevent 82 # Unlock screen
 
-    # Step 10: Install the APK on the emulator
+    # Step 11: Install the APK on the emulator
     - name: Install APK on Emulator
       run: adb install ${{ env.TEST_APK_PATH }}
 
-    # Step 11: Start Appium server and run tests
+    # Step 12: Start Appium server and run tests
     - name: Start Appium Server and Run Tests
       run: |
         appium &  # Start Appium server in the background
         pytest pytest --alluredir="./reports"  # Run your Appium Python tests
 
-    # Step 12: Upload test results (optional)
+    # Step 13: Upload test results (optional)
     - name: Upload test results
       uses: actions/upload-artifact@v3
       with:

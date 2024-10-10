@@ -52,13 +52,15 @@ jobs:
     - name: Install Appium
       run: npm install -g appium
 
-    # Step 6: Install Android SDK cmdline-tools
+    # Step 6: Download and Setup Android SDK cmdline-tools
     - name: Install Android SDK cmdline-tools
       run: |
         mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
         curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-mac-8512546_latest.zip
         unzip sdk-tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools
         mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
+        echo "export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH" >> $HOME/.bash_profile
+        source $HOME/.bash_profile
         yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
 
     # Step 7: Install Android emulator, system image, and start emulator

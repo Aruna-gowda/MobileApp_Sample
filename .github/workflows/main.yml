@@ -35,13 +35,6 @@ jobs:
         brew install --cask temurin  # Use latest Temurin JDK (JDK 11+)
         java -version  # Verify Java installation
     
-    # Install JAXB (Java XML Binding API)
-    - name: Install JAXB for JDK 11+
-      run: |
-        curl -L -o jaxb-api.zip https://repo1.maven.org/maven2/com/sun/xml/bind/jaxb-ri/2.3.3/jaxb-ri-2.3.3.zip
-        unzip jaxb-api.zip
-        export CLASSPATH=$CLASSPATH:$(pwd)/jaxb-ri-2.3.3/lib/jaxb-api.jar:$(pwd)/jaxb-ri-2.3.3/lib/jaxb-impl.jar:$(pwd)/jaxb-ri-2.3.3/lib/jaxb-core.jar
-
     # Step 4: Install Node.js (required for Appium)
     - name: Install Node.js
       uses: actions/setup-node@v3
@@ -63,13 +56,13 @@ jobs:
         source $HOME/.bash_profile
         yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
 
-    # Step 7: Install Android emulator, system image, and start emulator
+    # Step 7: Install Android Emulator and System Image
     - name: Install Android Emulator and System Image
       run: |
         yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --install "system-images;android-${{ env.API_LEVEL }};${{ env.TARGET }};x86_64"
         $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "platform-tools" "emulator" "platforms;android-${{ env.API_LEVEL }}"
         $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager create avd -n ${{ env.EMULATOR_NAME }} -k "system-images;android-${{ env.API_LEVEL }};${{ env.TARGET }};x86_64" --device ${{ env.DEVICE }}
-    
+
     # Step 8: Start the Android emulator
     - name: Start Android Emulator
       run: |
